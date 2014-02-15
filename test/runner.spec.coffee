@@ -51,10 +51,10 @@ describe 'runner', ->
     
     expect(onEnd).calledOnce
 
-  it 'emits error on non-zero exit', ->
-    onError = sinon.spy()
-    echo = runner('echo').on('error', onError)()
+  it 'emits fail on non-zero exit', ->
+    onFail = sinon.spy()
+    echo = runner('echo').on('fail', onFail)()
     @process.emit 'exit', 200
 
-    expect(onError).calledOnce
-    expect(onError).calledWith 200
+    expect(onFail).calledOnce
+    expect(onFail).calledWith 200

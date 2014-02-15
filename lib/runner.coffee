@@ -11,6 +11,7 @@ childProcess= require('child_process')
 module.exports = (command, cliArgs = [], options = {})->
   {spawn} = childProcess
   eventEmitter = new EventEmitter
+  eventEmitter.on 'fail' , ->
 
   if !cliArgs.splice
     options = cliArgs
@@ -43,7 +44,7 @@ module.exports = (command, cliArgs = [], options = {})->
 
     process.on 'exit', (code, signal)->
       if code or signal
-        eventEmitter.emit('error', code)
+        eventEmitter.emit('fail', code)
       else
         eventEmitter.emit('end')
 
