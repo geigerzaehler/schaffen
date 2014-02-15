@@ -12,6 +12,13 @@ module.exports = (command, cliArgs = [], options = {})->
   {spawn} = childProcess
   eventEmitter = new EventEmitter
 
+  if !cliArgs.splice
+    options = cliArgs
+    cliArgs = []
+
+  if command.indexOf(' ') > -1
+    [command, cliArgs...] = command.split(' ')
+
   if typeof cliArgs == 'function'
     getArgs = cliArgs
   else
@@ -33,6 +40,12 @@ module.exports = (command, cliArgs = [], options = {})->
     process.emit = (args...)->
       emit(args...)
       eventEmitter.emit(args...)
+
+    process.on 'exit', (code, signal)->
+      if code or signal
+        eventEmitter.emit('error', code)
+      else
+        eventEmitter.emit('end')
 
     eventEmitter.emit 'run', args...
 

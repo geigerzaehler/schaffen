@@ -8,7 +8,7 @@ chai = require('chai')
 chai.use(sinonChai)
 expect = chai.expect
 
-worker = require('../worker')
+worker = require('../lib/worker')
 
 describe 'worker', ->
 
@@ -24,14 +24,19 @@ describe 'worker', ->
 
 
   it 'spawns child', ->
-    worker('sleep', '1').restart()
+    worker('sleep', '1').start()
+    expect(spawn).calledOnce
+    expect(spawn).calledWith('sleep', ['1'])
+
+  it 'splits arguments', ->
+    worker('sleep 1').start()
     expect(spawn).calledOnce
     expect(spawn).calledWith('sleep', ['1'])
 
   it 'restarts on exit after grace period', ->
     clock = sinon.useFakeTimers()
 
-    worker('sleep', throttle: 200).restart()
+    worker('sleep', throttle: 200).start()
     @process.emit('exit')
     clock.tick(200)
 
@@ -46,7 +51,7 @@ describe 'worker', ->
     sleep = worker('sleep')
     sleep.on 'restart', onRestart
 
-    sleep.restart()
+    sleep.start()
     expect(onRestart).calledOnce
 
     @process.emit('exit')
