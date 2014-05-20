@@ -46,14 +46,16 @@ module.exports = createWorker = (command, args..., options = {})->
   worker = new EventEmitter
 
   restart = ->
-    worker.stop().then ->
+    restarted = worker.stop().then ->
       worker.emit('restart')
       worker.process = spawn command, args, stdio: ['ignore', 1, 2]
+      worker.process.on 'exit', ->
+        delete worker.process
 
-      setTimeout ->
-        worker.process.on 'exit', onExitRestart
-      , 1500
-      worker.process
+    restarted.delay(1000).then (process)->
+      process.on 'exit', onExitRestart
+
+    restarted
 
   worker.start = restart
 
@@ -73,13 +75,11 @@ module.exports = createWorker = (command, args..., options = {})->
       return w.resolve()
 
     worker.process.removeListener 'exit', onExitRestart
-    exit = w.promise (resolve, reject)->
-      worker.once 'exit', -> resolve()
-    .then ->
-      del worker.process
+    exited = w.promise (resolve, reject)->
+      worker.process.once 'exit', -> resolve()
 
     worker.process.kill()
-    exit
+    exited
 
   onExitRestart = worker.restart.now
 
