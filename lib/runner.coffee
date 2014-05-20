@@ -6,22 +6,22 @@ childProcess= require('child_process')
 # Create a function that runs a command when called
 #
 #   echo = runner('echo')
-#   echo('hello world') // $ echo "hello world"
+#   echo('hello world')
+#   // $ echo "hello world"
 #
 module.exports = (command, cliArgs = [], options = {})->
   {spawn} = childProcess
   eventEmitter = new EventEmitter
-  eventEmitter.on 'fail' , ->
-
-  if !cliArgs.splice
-    options = cliArgs
-    cliArgs = []
 
   if command.indexOf(' ') > -1
+    options = cliArgs
     [command, cliArgs...] = command.split(' ')
 
   if typeof cliArgs == 'function'
     getArgs = cliArgs
+  else if not cliArgs.splice?
+    options = cliArgs
+    cliArgs = []
   else
     getArgs = (args...)->
       cliArgs.concat(args)

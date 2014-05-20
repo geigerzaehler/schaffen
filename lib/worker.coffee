@@ -1,3 +1,4 @@
+w = require('when')
 throttle = require('./throttle')
 debounce = require('debounce')
 childProcess = require('child_process')
@@ -6,7 +7,8 @@ childProcess = require('child_process')
 
 # Create a worker that can be restarted on demand
 #
-#   worker = createWorker('node myapp.js')
+#   var corker = require('schaffen').worker;
+#   var w = createWorker('node myapp.js');
 #   worker.start()
 #   // hack myapp.js
 #   worker.restart()
@@ -42,14 +44,16 @@ module.exports = createWorker = (command, args..., options = {})->
     [command, args...] = command.split(' ')
 
   worker = new EventEmitter
-  worker.process = null
 
   restart = ->
-    worker.stop()
-    worker.emit('restart')
-    worker.process = spawn command, args, stdio: ['ignore', 1, 2]
-    worker.process.on 'exit', onExitRestart
-    worker.process
+    worker.stop().then ->
+      worker.emit('restart')
+      worker.process = spawn command, args, stdio: ['ignore', 1, 2]
+
+      setTimeout ->
+        worker.process.on 'exit', onExitRestart
+      , 1500
+      worker.process
 
   worker.start = restart
 
@@ -65,9 +69,33 @@ module.exports = createWorker = (command, args..., options = {})->
     debounce(restart, threshold)
 
   worker.stop = ->
-    worker.process?.removeListener 'exit', onExitRestart
-    worker.process?.kill()
+    if not worker.process?
+      return w.resolve()
+
+    worker.process.removeListener 'exit', onExitRestart
+    exit = w.promise (resolve, reject)->
+      worker.once 'exit', -> resolve()
+    .then ->
+      del worker.process
+
+    worker.process.kill()
+    exit
 
   onExitRestart = worker.restart.now
 
   worker
+
+class Worker extends EventEmitter
+
+  stop: ->
+    if not worker.process?
+      w.resolve()
+
+    worker.process.removeListener 'exit', @onExitRestart
+    exit = w.promise (resolve, reject)->
+      worker.once 'exit', -> resolve()
+    .then ->
+      del worker.process
+
+    worker.process.kill()
+    exit
