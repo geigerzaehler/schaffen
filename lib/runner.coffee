@@ -48,9 +48,9 @@ module.exports = (args..., options)->
       render(arg, vars)
 
     if compiledArgs.length == 1
-      process = exec(compiledArgs[0], {stdio})
-    else
-      process = spawn(compiledArgs[0], compiledArgs[1..], {stdio})
+      compiledArgs.unshift('bash', '-c')
+
+    process = spawn(compiledArgs[0], compiledArgs[1..], {stdio})
 
     # Delegate events to our eventEmitter
     emit = process.emit.bind(process)

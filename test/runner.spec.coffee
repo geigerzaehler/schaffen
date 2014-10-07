@@ -13,24 +13,20 @@ runner = require('../lib/runner')
 describe 'runner', ->
 
   spawn = null
-  exec = null
 
   beforeEach ->
     @process = new EventEmitter
     @process.kill = sinon.spy()
     spawn = sinon.stub(childProcess, 'spawn')
       .returns(@process)
-    exec = sinon.stub(childProcess, 'exec')
-      .returns(@process)
 
   afterEach ->
     spawn.restore()
-    exec.restore()
 
   it 'spawns child', ->
     runner('echo')()
-    expect(exec).calledOnce
-    expect(exec).calledWith('echo')
+    expect(spawn).calledOnce
+    expect(spawn).calledWith('bash', ['-c', 'echo'])
 
   it 'spawns child with arguments', ->
     runner('echo', 'hello world')()
