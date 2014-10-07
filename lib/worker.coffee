@@ -7,13 +7,13 @@ childProcess = require('child_process')
 
 # Create a worker that can be restarted on demand
 #
-#   var corker = require('schaffen').worker;
-#   var app = createWorker('node myapp.js');
+#   var worker = require('schaffen').worker;
+#   var app = worker('node myapp.js');
 #   app.start()
 #   // hack myapp.js
 #   app.restart()
 #
-# If the worker exits it will be restarted automatically. If you want to
+# If the worker exits, it will be restarted automatically. If you want to
 # stop the worker use
 #
 #   app.stop()
@@ -38,35 +38,51 @@ module.exports = worker = ->
 
 class Worker extends EventEmitter
 
-  constructor: (@command, @args...)->
+  constructor: (@args..., options)->
     super()
-    if @command.indexOf(' ') > -1 and not @args.length
-      [@command, @args...] = @command.split(' ')
+
+    if typeof options == 'string'
+      @args.push(options)
+      options = {}
+
+    @gracePeriod = options?.gracePeriod || 1000
 
     @restart = @restart.bind(this)
-    @restart.now = @restart
     @stop = @stop.bind(this)
     @start = @restart
 
   restart: ->
-    {spawn} = childProcess
     restarted = @stop().then =>
+      @process = spawn @args, stdio: ['ignore', 1, 2]
       @emit('restart')
-      @process = spawn @command, @args, stdio: ['ignore', 1, 2]
       @process.on 'exit', => delete @process
+      return @process
 
-    restarted.delay(1000).then (process)=>
-      process.on 'exit', @restart.now
+    # Restart the process if it exits after more than a the grace
+    # period.
+    restarted.delay(@gracePeriod).then =>
+      @process.on 'exit', @restart
 
     restarted
 
+  # Send KILL signal to the worker and return a promise that is
+  # resolved, when the worker exits.
   stop: ->
     if not @process?
       return w.resolve()
 
-    @process.removeListener 'exit', @restart.now
+    @process.removeListener 'exit', @restart
     exited = w.promise (resolve, reject)=>
-      @process.once 'exit', -> resolve()
+      @process.once 'exit', resolve
 
     @process.kill()
     exited
+
+
+spawn = (args, options)->
+  args = args.slice()
+  if args.length == 1
+    args.unshift('sh', '-c')
+  cmd = args.shift()
+  childProcess.spawn cmd, args, options
+

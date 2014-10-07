@@ -17,11 +17,13 @@ promise = (p)->
 describe 'worker', ->
 
   spawn = null
+  process = null
+
   beforeEach ->
-    @process = new EventEmitter
-    @process.kill = sinon.spy => @process.emit 'exit'
+    process = new EventEmitter
+    process.kill = sinon.spy => process.emit 'exit'
     spawn = sinon.stub(childProcess, 'spawn')
-      .returns(@process)
+      .returns(process)
 
   afterEach ->
     spawn.restore()
@@ -32,19 +34,22 @@ describe 'worker', ->
       expect(spawn).calledOnce
       expect(spawn).calledWith('sleep', ['1'])
 
-  it 'splits arguments', promise ->
+  it 'spawns shell', promise ->
     worker('sleep 1').start().then ->
       expect(spawn).calledOnce
-      expect(spawn).calledWith('sleep', ['1'])
+      expect(spawn).calledWith('sh', ['-c', 'sleep 1'])
 
   it 'restarts on exit after grace period', promise ->
     clock = sinon.useFakeTimers()
 
-    worker('sleep').start().tap ->
+    sleep = worker('sleep', gracePeriod: 500)
+    sleep.start().then ->
       expect(spawn).calledOnce
       clock.tick(1000)
-    .then (process)->
-      process.emit('exit')
+    .then ->
+      restarted = w.promise (resolve)-> sleep.once 'restart', resolve
+      process.kill()
+      restarted
     .then ->
       expect(spawn).calledTwice
     .finally ->
@@ -56,5 +61,5 @@ describe 'worker', ->
     sleep.start().tap (process)->
       expect(process.kill).not.called
       sleep.restart()
-    .then (process)->
+    .then ->
       expect(process.kill).calledOnce

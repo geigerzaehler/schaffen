@@ -1,13 +1,24 @@
 {
   "name": "schaffen",
-  "version": "0.4.0",
-  "description": "",
+  "version": "0.4.1",
+  "description": "Control child processes",
+  "author": "Thomas Scholtes",
+  "license": "MIT",
   "main": "index.js",
   "scripts": {
     "test": "node_modules/.bin/mocha"
   },
-  "author": "",
-  "license": "BSD-2-Clause",
+  "keywords": [
+    "process", "development"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:geigerzaehler/schaffen"
+  },
+  "bugs": {
+    "url": "https://github.com/geigerzaehler/schaffen/issues"
+  },
+  "homepage": "https://github.com/geigerzaehler/schaffen",
   "dependencies": {
     "debounce": "0.0.3",
     "coffee-script": "~1.6.3",
