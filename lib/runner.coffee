@@ -5,38 +5,54 @@ childProcess= require('child_process')
 
 # Create a function that runs a command when called
 #
-#   echo = runner('echo')
-#   echo('hello world')
-#   // $ echo "hello world"
+#   echo = runner('echo hi')
+#   echo()
+#   // $ echo hi
 #
-module.exports = (command, cliArgs = [], options = {})->
-  {spawn} = childProcess
+# You can use command templates to fill in function arguments
+#
+#   echo = runner('echo {} {}')
+#   echo('hello', 'world')
+#   // $ echo hello world
+#
+# Or better yet
+#
+#   echo = runner('echo', 'hi', '{}')
+#   echo('there')
+#   // $ echo hi there
+#
+# There are several events that are emitted by the runner.
+#
+# * 'run' is emitted every time the runner is executed.
+# * 'end' is emmited when the executed process exists normally.
+# * 'fail' is emitted when the executed process exits with a non-zero
+#    exit code.
+#
+# @param options.silent  If set to true, do not show stdout of the
+#                        command.
+module.exports = (args..., options)->
+  {spawn, exec} = childProcess
   eventEmitter = new EventEmitter
 
-  if command.indexOf(' ') > -1
-    options = cliArgs
-    [command, cliArgs...] = command.split(' ')
-
-  if typeof cliArgs == 'function'
-    getArgs = cliArgs
-  else if not cliArgs.splice?
-    options = cliArgs
-    cliArgs = []
-  else
-    getArgs = (args...)->
-      cliArgs.concat(args)
+  if typeof options == 'string'
+    args.push(options)
+    options = {}
 
   stdio = ['ignore', 1, 2]
   if options.silent
     stdio[1] = 'ignore'
 
-  options.debounce ||= 400
 
+  run = (vars...)->
+    compiledArgs = for arg in args
+      render(arg, vars)
 
-  run = (additionalArgs...)->
-    args = getArgs(additionalArgs...)
-    process = spawn(command, args, {stdio})
+    if compiledArgs.length == 1
+      process = exec(compiledArgs[0], {stdio})
+    else
+      process = spawn(compiledArgs[0], compiledArgs[1..], {stdio})
 
+    # Delegate events to our eventEmitter
     emit = process.emit.bind(process)
     process.emit = (args...)->
       emit(args...)
@@ -48,13 +64,24 @@ module.exports = (command, cliArgs = [], options = {})->
       else
         eventEmitter.emit('end')
 
-    eventEmitter.emit 'run', args...
+    eventEmitter.emit 'run', compiledArgs...
 
     process
 
-  run.debounced = debounce(run, options.debounce)
+
   run.on = (event, cb)->
     eventEmitter.on(event, cb)
     run
 
   run
+
+
+# Replaces each occurence of '{}' in the string template by consuming
+# values from `vars`.
+#
+# Each value that is rendered is shifted from the `vars` array.
+# If there are fewer elements in `vars` than occruences in '{}', then
+# the placeholders are filled with the empty string
+render = (template, vars)->
+  template.split('{}').reduce (rendered, next, index)->
+    rendered + (vars.shift() || '') + next

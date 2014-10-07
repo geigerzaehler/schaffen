@@ -13,35 +13,42 @@ runner = require('../lib/runner')
 describe 'runner', ->
 
   spawn = null
+  exec = null
+
   beforeEach ->
     @process = new EventEmitter
     @process.kill = sinon.spy()
     spawn = sinon.stub(childProcess, 'spawn')
       .returns(@process)
+    exec = sinon.stub(childProcess, 'exec')
+      .returns(@process)
 
   afterEach ->
     spawn.restore()
+    exec.restore()
 
   it 'spawns child', ->
     runner('echo')()
-    expect(spawn).calledOnce
-    expect(spawn).calledWith('echo')
+    expect(exec).calledOnce
+    expect(exec).calledWith('echo')
 
   it 'spawns child with arguments', ->
-    runner('echo', ['hello world'])()
+    runner('echo', 'hello world')()
     expect(spawn).calledOnce
     expect(spawn).calledWith('echo', ['hello world'])
 
   it 'emits run event', ->
     onRun = sinon.spy()
-    runner('echo', ['hello'])
-      .on('run', onRun)('world')
+    echo = runner('echo', '{}')
+    echo.on 'run', onRun
+
+    echo('hi')
 
     expect(onRun).calledOnce
-    expect(onRun).calledWith 'hello', 'world'
+    expect(onRun).calledWith 'echo', 'hi'
 
   it 'spawns silently with split arguments', ->
-    runner('echo hello', silent: true)()
+    runner('echo', 'hello', silent: true)()
     expect(spawn).calledWith 'echo', ['hello'], stdio: ['ignore', 'ignore', 2]
 
   it 'emits end on succesful exit', ->
