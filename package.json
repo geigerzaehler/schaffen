@@ -9,7 +9,8 @@
     "test": "node_modules/.bin/mocha"
   },
   "keywords": [
-    "process", "development"
+    "process",
+    "development"
   ],
   "repository": {
     "type": "git",
@@ -20,13 +21,13 @@
   },
   "homepage": "https://github.com/geigerzaehler/schaffen",
   "dependencies": {
-    "debounce": "0.0.3",
     "coffee-script": "~1.6.3",
+    "debounce": "0.0.3",
     "when": "~3.2.1"
   },
   "devDependencies": {
     "chai": "~1.9.0",
-    "mocha": "~1.17.1",
+    "mocha": "^1.21.5",
     "sinon": "~1.8.2",
     "sinon-chai": "~2.5.0"
   }

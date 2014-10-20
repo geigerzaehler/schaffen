@@ -11,9 +11,6 @@ expect = chai.expect
 
 worker = require('../lib/worker')
 
-promise = (p)->
-  (done)-> p().done (->done()), done
-
 describe 'worker', ->
 
   spawn = null
@@ -29,17 +26,17 @@ describe 'worker', ->
     spawn.restore()
 
 
-  it 'spawns child', promise ->
+  it 'spawns child', ->
     worker('sleep', '1').start().then ->
       expect(spawn).calledOnce
       expect(spawn).calledWith('sleep', ['1'])
 
-  it 'spawns shell', promise ->
+  it 'spawns shell', ->
     worker('sleep 1').start().then ->
       expect(spawn).calledOnce
       expect(spawn).calledWith('sh', ['-c', 'sleep 1'])
 
-  it 'restarts on exit after grace period', promise ->
+  it 'restarts on exit after grace period', ->
     clock = sinon.useFakeTimers()
 
     sleep = worker('sleep', gracePeriod: 500)
@@ -55,7 +52,7 @@ describe 'worker', ->
     .finally ->
       clock.restore()
 
-  it 'kills process on restart', promise ->
+  it 'kills process on restart', ->
     sleep = worker('sleep')
 
     sleep.start().tap (process)->
