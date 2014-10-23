@@ -25,6 +25,14 @@ childProcess = require('child_process')
 module.exports = worker = ->
   return new Worker(arguments...)
 
+
+worker.start = (args...)->
+  process.on 'exit', -> w.process?.kill()
+  w = worker(args...)
+  w.start()
+  w
+
+
 class Worker extends EventEmitter
 
   constructor: (@args..., options)->

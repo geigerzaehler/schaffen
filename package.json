@@ -1,6 +1,6 @@
 {
   "name": "schaffen",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Control child processes",
   "author": "Thomas Scholtes",
   "license": "MIT",
