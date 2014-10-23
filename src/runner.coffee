@@ -1,4 +1,3 @@
-debounce = require('debounce')
 childProcess= require('child_process')
 {EventEmitter} = require('events')
 

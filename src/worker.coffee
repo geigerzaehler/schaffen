@@ -1,6 +1,4 @@
 w = require('when')
-throttle = require('./throttle')
-debounce = require('debounce')
 childProcess = require('child_process')
 {EventEmitter} = require('events')
 
@@ -17,15 +15,6 @@ childProcess = require('child_process')
 # stop the worker use
 #
 #   app.stop()
-#
-# The restart can be debounced
-#
-#   restart = app.restart.debounce(2000)
-#   restart()
-#   // wait a second
-#   restart()
-#
-# The worker will only restart once, after another two seconds.
 #
 # You can listen to the restart event.
 #
@@ -85,4 +74,3 @@ spawn = (args, options)->
     args.unshift('sh', '-c')
   cmd = args.shift()
   childProcess.spawn cmd, args, options
-

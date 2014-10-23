@@ -8,7 +8,7 @@ chai = require('chai')
 chai.use(sinonChai)
 expect = chai.expect
 
-runner = require('../lib/runner')
+runner = require('../src/runner')
 
 describe 'runner', ->
 

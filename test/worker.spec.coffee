@@ -9,7 +9,7 @@ chai = require('chai')
 chai.use(sinonChai)
 expect = chai.expect
 
-worker = require('../lib/worker')
+worker = require('../src/worker')
 
 describe 'worker', ->
 

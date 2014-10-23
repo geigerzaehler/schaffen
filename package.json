@@ -1,12 +1,12 @@
 {
   "name": "schaffen",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Control child processes",
   "author": "Thomas Scholtes",
   "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha"
+    "test": "make test"
   },
   "keywords": [
     "process",
@@ -21,14 +21,13 @@
   },
   "homepage": "https://github.com/geigerzaehler/schaffen",
   "dependencies": {
-    "coffee-script": "~1.6.3",
-    "debounce": "0.0.3",
     "when": "~3.2.1"
   },
   "devDependencies": {
-    "chai": "~1.9.0",
+    "coffee-script": "^1.8.0",
+    "chai": "^1.9.0",
     "mocha": "^1.21.5",
-    "sinon": "~1.8.2",
-    "sinon-chai": "~2.5.0"
+    "sinon": "^1.8.2",
+    "sinon-chai": "^2.5.0"
   }
 }
