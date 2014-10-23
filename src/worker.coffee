@@ -27,10 +27,10 @@ module.exports = worker = ->
 
 
 worker.start = (args...)->
-  process.on 'exit', -> w.process?.kill()
-  w = worker(args...)
-  w.start()
-  w
+  process.on 'exit', -> worker_.process?.kill()
+  worker_ = worker(args...)
+  worker_.start()
+  worker_
 
 
 class Worker extends EventEmitter

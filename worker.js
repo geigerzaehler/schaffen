@@ -20,15 +20,15 @@
   };
 
   worker.start = function() {
-    var args;
+    var args, worker_;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     process.on('exit', function() {
       var _ref;
-      return (_ref = w.process) != null ? _ref.kill() : void 0;
+      return (_ref = worker_.process) != null ? _ref.kill() : void 0;
     });
-    w = worker.apply(null, args);
-    w.start();
-    return w;
+    worker_ = worker.apply(null, args);
+    worker_.start();
+    return worker_;
   };
 
   Worker = (function(_super) {
