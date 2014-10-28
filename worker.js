@@ -65,7 +65,11 @@
       })(this));
       restarted.delay(this.gracePeriod).then((function(_this) {
         return function() {
-          return _this.process.on('exit', _this.restart);
+          if (_this.process) {
+            return _this.process.on('exit', _this.restart);
+          } else {
+            return _this.restart();
+          }
         };
       })(this));
       return restarted;

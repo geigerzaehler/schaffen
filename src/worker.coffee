@@ -58,7 +58,10 @@ class Worker extends EventEmitter
     # Restart the process if it exits after more than a the grace
     # period.
     restarted.delay(@gracePeriod).then =>
-      @process.on 'exit', @restart
+      if @process
+        @process.on 'exit', @restart
+      else
+        @restart()
 
     restarted
 
