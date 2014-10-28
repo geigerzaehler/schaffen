@@ -31,11 +31,6 @@ describe 'worker', ->
       expect(spawn).calledOnce
       expect(spawn).calledWith('sleep', ['1'])
 
-  it 'spawns shell', ->
-    worker('sleep 1').start().then ->
-      expect(spawn).calledOnce
-      expect(spawn).calledWith('sh', ['-c', 'sleep 1'])
-
   it 'restarts on exit after grace period', ->
     clock = sinon.useFakeTimers()
 

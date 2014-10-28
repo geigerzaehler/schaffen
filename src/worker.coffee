@@ -80,8 +80,4 @@ class Worker extends EventEmitter
 
 
 spawn = (args, options)->
-  args = args.slice()
-  if args.length == 1
-    args.unshift('sh', '-c')
-  cmd = args.shift()
-  childProcess.spawn cmd, args, options
+  childProcess.spawn args[0], args[1..], options

@@ -95,13 +95,7 @@
   })(EventEmitter);
 
   spawn = function(args, options) {
-    var cmd;
-    args = args.slice();
-    if (args.length === 1) {
-      args.unshift('sh', '-c');
-    }
-    cmd = args.shift();
-    return childProcess.spawn(cmd, args, options);
+    return childProcess.spawn(args[0], args.slice(1), options);
   };
 
 }).call(this);
